@@ -1,10 +1,11 @@
+let container = document.querySelector(".container");
 let boxes = document.querySelectorAll(".box");
 let resetBtn = document.querySelector("#reset-btn");
-let newGameBtn = document.querySelector("#new-btn");
 let msgContainer = document.querySelector(".msg-container");
 let mssg = document.querySelector("#mssg");
 
-let turnO = true;
+let turnX = true; //playerX, playerO
+let count = 0; //To Track Tie
 
 const winPatterns = [
     [0, 1, 2],
@@ -17,27 +18,44 @@ const winPatterns = [
     [6, 7, 8],
 ];
 
+// Reset button
 const resetGame = () => {
-    turnO = true;
+    turnX = true;
+    count = 0;
     enableBoxes();
     msgContainer.classList.add("hide");
+    container.style.display = "grid";
 }
 
-boxes.forEach((box)=> {
+// Play area
+boxes.forEach((box) => {
     box.addEventListener("click", () => {
-        
-        if(turnO) {  //playerO turn
-            box.innerText = "O";
-            turnO = false;
-        } else {   //playerX turn
+        if(turnX) {  //playerX turn
             box.innerText = "X";
-            turnO = true;
+            turnX = false;
+        } else {   //playerO turn
+            box.innerText = "O";
+            turnX = true;
         }
         box.disabled = true;
+        count++;
 
-        checkWinner();
+        let isWinner = checkWinner();
+        
+        // Check tie
+        if(count === 9 && !isWinner) { //When count reaches to 9 but Game has no winner Its Tie
+            gameTie();
+        }
     });
 });
+
+// Game tie
+const gameTie = () => {
+    mssg.innerText = `Game is >"Tie"`;
+    msgContainer.classList.remove("hide");
+    container.style.display = "none";
+    disableBoxes();
+}
 
 const disableBoxes = () => {
     for(let box of boxes) {
@@ -52,12 +70,15 @@ const enableBoxes = () => {
     }
 }
 
+// Show winner
 const showWinner = (winner) => {
-    mssg.innerText = `Congratulations, Winner is ${winner}`;
+    mssg.innerText = `Congratulations Winner is ${winner}`;
     msgContainer.classList.remove("hide");
+    container.style.display = "none";
     disableBoxes();
 };
 
+// Check winner
 const checkWinner = () => {
     for(let pattern of winPatterns) {
         let posi1Val = boxes[pattern[0]].innerText;
@@ -65,14 +86,15 @@ const checkWinner = () => {
         let posi3Val = boxes[pattern[2]].innerText;
 
         if(posi1Val != "" && posi2Val != "" && posi3Val != "") {
-            if(posi1Val === posi2Val && posi2Val === posi3Val) {
-                console.log("winner");
+            if(posi1Val === posi2Val && posi2Val === posi3Val) {              
                 showWinner(posi1Val);
+                return true;
             }
         }
     }
 };
 
-newGameBtn.addEventListener("click", resetGame);
-resetBtn.addEventListener("click", resetGame);
 
+
+
+resetBtn.addEventListener("click", resetGame);
